@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Data and results: they go to the Zenodo deposit, never to git.
+# Measured in the source repo: data/flight_data 6.0 GB, open_top_run 3.4 GB,
+# _incoming 1.7 GB, dijkstra_run (now dp_muo_run) 366 MB, dp_run 73 MB.
+# ─────────────────────────────────────────────────────────────────────────────
+0_Data/flight_data/
+0_Data/performance_data/
+*.parquet
+*.parquet.gz
+*.pkl
+*.pkl.gz
+*.npz
+*.casadi
+*.tar
+*.tar.gz
+*.zarr/
+era5-zarr/
+
+# Campaign output: everything under 3_Results/ (flight_selection/, contrail/)
+# except its README.
+3_Results/*
+!3_Results/README.md
+_incoming/
+# The old locations, 1_Flight_Selection/Results/ and 2_Run/results/, until they are
+# moved. Both spellings: the cluster's git is case-sensitive, unlike Windows'.
+**/results/
+**/Results/
+**/open_top_run/
+**/graph2d_run/
+**/dp_muo_run/
+**/dijkstra_run/
+**/dp_run/
+**/_flight_cache/
+progress.csv
+
+# ...but the small stage-1 manifests ARE versioned: flight lists,
+# coverage reports and convergence lists are KB-sized and define the population.
+!1_Flight_Selection/manifests/
+!1_Flight_Selection/manifests/**
+
+# Generated figures: the repo keeps the script, not the PNG
+**/figures/**/*.png
+**/figures/**/*.pdf
+**/figures/timings.csv
+*.log
+
+# SLURM job logs: the directory is versioned (every job writes into it, and SLURM
+# will not create it), its contents are not.
+logs/*
+!logs/.gitkeep
+slurm*.out
+slurm*.err
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Environment
+# ─────────────────────────────────────────────────────────────────────────────
+.venv/
+.venv_baseline/
+venv/
+# the cluster env the sbatch files activate
+.conda-optimal/
+wheelhouse*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cluster and IDE
+# ─────────────────────────────────────────────────────────────────────────────
+slurm-*.out
+*.sbatch.out
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Secrets (the CDS/ERA5 key lives here)
+# ─────────────────────────────────────────────────────────────────────────────
+.env
+.cdsapirc
+*.secret
+
+# Local clone of openskynetwork/opensky-api (unused, not part of this repo)
+src/opensky-api/
+
+# Post-processing output: the figures and tables 4_Post_Treatment/ scripts write
+# (Optimality/, Computing_time/, ...). Rebuildable from 3_Results/, so never in git.
+4_Post_Treatment/**/*.csv
+4_Post_Treatment/**/*.png
+4_Post_Treatment/**/*.pdf
+4_Post_Treatment/**/*.svg

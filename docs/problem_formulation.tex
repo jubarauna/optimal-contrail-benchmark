@@ -1,0 +1,307 @@
+% =============================================================================
+%  Problem formulation for the fuel-vs-contrail trajectory optimization
+%  benchmarked in studies/benchmarking/Per_flight/benchmarking.py
+%
+%  Usage:  \input{problem_formulation}
+%  Requires: amsmath, amssymb, booktabs
+% =============================================================================
+
+% \argmin is not standard; declared here so the file is self-contained.
+\makeatletter
+\@ifundefined{argmin}{\DeclareMathOperator*{\argmin}{arg\,min}}{}
+\makeatother
+
+\section{Problem formulation}
+\label{sec:formulation}
+
+\subsection{Overview}
+
+We consider the \emph{bi-objective vertical-profile optimization} of a single
+cruise flight along a fixed lateral track, trading fuel burn against persistent
+contrail formation. The lateral path is the great circle between origin and
+destination and the Mach number is held fixed, so the only decision variable is
+the altitude profile. The problem is stated once in continuous form
+(Section~\ref{sec:cont}) and once in discretized form
+(Section~\ref{sec:disc}); the two scalarizations used to trace the Pareto front
+are given in Section~\ref{sec:scal}, and the solution methods being compared in
+Section~\ref{sec:methods}.
+
+\subsection{Contrail cost field}
+\label{sec:cost}
+
+Let $\mathcal{D}\subset\mathbb{R}^4$ denote the space--time domain
+$(t,\lambda,\phi,h)$ of time, longitude, latitude and altitude. From ERA5
+reanalysis we evaluate the Schmidt--Appleman criterion (SAC) and the
+ice-supersaturated region (ISSR) condition, and define the persistent-contrail
+indicator $\mathbb{1}_{\mathrm{SAC}}\cdot\mathbb{1}_{\mathrm{ISSR}}$. Because a
+binary field is unusable by a gradient-based solver, it is convolved with an
+isotropic Gaussian kernel $G_\sigma$ of bandwidth $\sigma$ and represented as a
+cubic B-spline interpolant,
+%
+\begin{equation}
+  c_\sigma \;=\; G_\sigma * \bigl(\mathbb{1}_{\mathrm{SAC}}\cdot
+  \mathbb{1}_{\mathrm{ISSR}}\bigr) \;\in\; C^{2}(\mathcal{D}),
+  \qquad c_\sigma \ge 0 .
+  \label{eq:cost-field}
+\end{equation}
+%
+The smoothing bandwidth $\sigma$ is a parameter of the study: it controls how
+sharply the cost field penalises the boundary of a contrail-forming region.
+
+\subsection{Continuous optimal-control problem}
+\label{sec:cont}
+
+Let the state be $\mathbf{x}(t)=\bigl(x(t),y(t),h(t),m(t)\bigr)$ --- horizontal
+position, altitude and aircraft mass --- and the control $u(t)=\dot h(t)$ the
+vertical speed, over the horizon $t\in[0,t_f]$. With the track angle $\chi$ and
+the Mach number $M$ fixed, the dynamics are
+%
+\begin{equation}
+  \begin{aligned}
+    \dot x &= V_{\mathrm{TAS}}(M,h)\cos\chi, &\qquad
+    \dot y &= V_{\mathrm{TAS}}(M,h)\sin\chi, \\
+    \dot h &= u, &\qquad
+    \dot m &= -\,\mathrm{ff}\bigl(m,V_{\mathrm{TAS}}(M,h),h,u\bigr),
+  \end{aligned}
+  \label{eq:dynamics}
+\end{equation}
+%
+where $V_{\mathrm{TAS}}(M,h)=M\,a(h)$ with $a(h)$ the speed of sound, and
+$\mathrm{ff}(\cdot)$ is the en-route fuel-flow model.
+
+The two objectives are the total fuel burn and the accumulated contrail cost,
+%
+\begin{align}
+  J_{\mathrm{fuel}}\bigl(h(\cdot)\bigr)
+    &= \int_0^{t_f}\mathrm{ff}\bigl(m,V_{\mathrm{TAS}},h,\dot h\bigr)\,\mathrm{d}t
+     \;=\; m(0)-m(t_f),
+  \label{eq:Jfuel}\\[2pt]
+  J_{\mathrm{cont}}\bigl(h(\cdot)\bigr)
+    &= \int_0^{t_f} c_\sigma\bigl(t,\lambda(t),\phi(t),h(t)\bigr)\,\mathrm{d}t .
+  \label{eq:Jcont}
+\end{align}
+%
+subject to the path constraints
+%
+\begin{equation}
+  h_{\min}\le h(t)\le h_{\max},\qquad
+  \lvert\dot h(t)\rvert \le \dot h_{\max},\qquad
+  T(t)\le T_{\max}\bigl(V_{\mathrm{TAS}},h\bigr),\qquad
+  L(t)=m(t)\,g,
+  \label{eq:path-constraints}
+\end{equation}
+%
+and the boundary conditions $\bigl(x,y\bigr)(0)=\mathbf{p}_{\mathrm{orig}}$,
+$\bigl(x,y\bigr)(t_f)=\mathbf{p}_{\mathrm{dest}}$, $m(0)=m_0$.
+
+\subsection{Discretized problem on the layered graph}
+\label{sec:disc}
+
+The great circle is discretized into $N$ waypoints indexed $i=0,\dots,N-1$ at
+arc distances $d_i$ with \emph{fixed} arrival times $t_i$; the time grid follows
+from the fixed Mach number and the mean cruise altitude, so time is not a
+decision variable. Altitude is discretized into $N_h$ flight levels
+$h_j=h_{\min}+j\,\Delta h$, $j=0,\dots,N_h-1$. A trajectory is therefore a
+sequence of level indices $\mathbf{j}=(j_0,\dots,j_{N-1})$.
+
+For a transition from level $j$ at waypoint $i$ to level $j'$ at waypoint $i+1$,
+write $\Delta t_i=t_{i+1}-t_i$, the segment mean altitude
+$\bar h=\tfrac12(h_j+h_{j'})$, and the vertical speed
+$v_s = 60\,(h_{j'}-h_j)/\Delta t_i$. Let $\bar m_i$ denote a \emph{precomputed
+mass profile}, obtained by depleting $m_0$ at the minimum feasible fuel flow at
+each waypoint. Freezing the mass in this way makes the arc costs independent of
+the path taken to reach the arc, which is what renders the discrete problem an
+exact shortest-path problem. The two arc costs are
+%
+\begin{equation}
+  f_{i,j\to j'} = \mathrm{ff}\bigl(\bar m_i, V_{\mathrm{TAS}}(M,\bar h),
+  \bar h, v_s\bigr)\,\Delta t_i,
+  \qquad
+  g_{i,j\to j'} = c_\sigma\bigl(t_i^{\mathrm{mid}},\bar h\bigr)\,\Delta t_i,
+  \label{eq:arc-costs}
+\end{equation}
+%
+with $t_i^{\mathrm{mid}}=\tfrac12(t_i+t_{i+1})$.
+
+\paragraph{Admissible transitions.}
+A transition belongs to the admissible set $\mathcal{A}$ if it respects the
+altitude bounds $0\le j'<N_h$, the rate limit
+$\lvert h_{j'}-h_j\rvert/\Delta t_i \le \dot h_{\max}$, and the aerodynamic
+feasibility of level flight at $(\bar m_i,\bar h,v_s)$, expressed as a thrust
+margin and a lift margin,
+%
+\begin{equation}
+  0.95\,T_{\max} \;\ge\; D\bigl(\bar m_i,V_{\mathrm{TAS}},\bar h,v_s\bigr),
+  \qquad
+  0.80\,\sqrt{\frac{0.9\,T_{\max}/(qS)-C_{D_0}}{k}}\;qS
+  \;\ge\; \bar m_i\,g,
+  \label{eq:feasibility}
+\end{equation}
+%
+where $q=\tfrac12\rho(\bar h)V_{\mathrm{TAS}}^2$ is the dynamic pressure, $S$
+the wing area, and $(C_{D_0},k)$ the clean-configuration drag polar
+coefficients. Inadmissible transitions are assigned infinite cost.
+
+\paragraph{Anti-oscillation constraint.}
+To exclude physically implausible zigzag profiles, the state is augmented with a
+vertical direction $d_i=\operatorname{sgn}(j_i-j_{i-1})\in\{-1,0,+1\}$ and the
+profile is required to satisfy
+%
+\begin{equation}
+  d_i=+1 \;\Rightarrow\; j_{i+1}\ge j_i, \qquad
+  d_i=-1 \;\Rightarrow\; j_{i+1}\le j_i, \qquad
+  d_i=\phantom{+}0 \;\Rightarrow\; j_{i+1}\ \text{free}.
+  \label{eq:antiosc}
+\end{equation}
+%
+Once a climb has begun it may not be interrupted by a descent until a level
+segment intervenes, and symmetrically for descents. This constraint is the
+reason the dynamic-programming state must be the triple $(i,j,d)$ rather than
+the pair $(i,j)$.
+
+\paragraph{The bi-objective program.}
+Let $\mathcal{X}$ be the set of level sequences satisfying $\mathcal{A}$ and
+\eqref{eq:antiosc}, with free initial level and $d_0=0$. The problem is
+%
+\begin{equation}
+  \min_{\mathbf{j}\in\mathcal{X}}\;
+  \Bigl(\,F(\mathbf{j}),\;C(\mathbf{j})\,\Bigr),
+  \qquad
+  F(\mathbf{j})=\sum_{i=0}^{N-2} f_{i,j_i\to j_{i+1}},
+  \qquad
+  C(\mathbf{j})=\sum_{i=0}^{N-2} g_{i,j_i\to j_{i+1}},
+  \label{eq:biobjective}
+\end{equation}
+%
+understood in the Pareto sense. A trajectory $p\in\mathcal{X}$ dominates
+$q\in\mathcal{X}$ if $F(p)\le F(q)$ and $C(p)\le C(q)$ with at least one
+inequality strict, and the Pareto set is
+%
+\begin{equation}
+  \mathcal{P} = \bigl\{\,p\in\mathcal{X} \;:\;
+  \nexists\, q\in\mathcal{X}\ \text{dominating}\ p \,\bigr\}.
+  \label{eq:pareto-set}
+\end{equation}
+
+\subsection{Scalarizations}
+\label{sec:scal}
+
+\paragraph{Weighted sum.}
+For a trade-off weight $\alpha\in[0,1]$,
+%
+\begin{equation}
+  p^\star(\alpha)\;=\;
+  \argmin_{p\in\mathcal{X}}\;\;(1-\alpha)\,F(p)+\alpha\,C(p).
+  \label{eq:ws}
+\end{equation}
+%
+Here $\alpha=0$ is the fuel-optimal baseline and $\alpha=1$ is pure contrail
+avoidance with fuel unconstrained. Sweeping $\alpha$ recovers only the points of
+$\mathcal{P}$ lying on the convex hull of the objective-space front; non-convex
+portions are unreachable by this scalarization, which motivates both the
+$\varepsilon$-constraint sweep and the exact label-setting solver.
+
+\paragraph{$\varepsilon$-constraint.}
+Let $F_0=\min_{p\in\mathcal{X}}F(p)$ be the fuel-optimal cost. For a fuel-slack
+fraction $\beta\ge 1$,
+%
+\begin{equation}
+  p^\star(\beta)\;=\;\argmin_{p\in\mathcal{X}}\;C(p)
+  \qquad\text{subject to}\qquad F(p)\le \beta\,F_0 .
+  \label{eq:eps}
+\end{equation}
+%
+This formulation recovers non-convex portions of the front. It is imposed
+natively in the continuous solver as an upper bound on total fuel. The discrete
+dynamic program has no native constraint mechanism, so \eqref{eq:eps} is instead
+approached through its weighted-sum dual: the weight $\alpha$ is bisected until
+$F\bigl(p^\star(\alpha)\bigr)\approx\beta F_0$. This recovers the
+$\varepsilon$-constrained optimum exactly only where the front is convex, and is
+reported as such.
+
+\subsection{Solution methods}
+\label{sec:methods}
+
+\paragraph{Dynamic programming.}
+The scalarized problem \eqref{eq:ws} is solved by backward recursion over the
+augmented state $(i,j,d)$. With $V_i(j,d)$ the optimal cost-to-go,
+%
+\begin{equation}
+  V_{N-1}(j,d)=0,
+  \qquad
+  V_i(j,d)=\!\!\min_{\substack{j'\,:\,(i,j\to j')\in\mathcal{A}\\
+  \operatorname{sgn}(j'-j)\,\in\,\mathcal{D}(d)}}\!\!
+  \Bigl[(1-\alpha)f_{i,j\to j'}+\alpha\,g_{i,j\to j'}
+  +V_{i+1}\bigl(j',\operatorname{sgn}(j'-j)\bigr)\Bigr],
+  \label{eq:bellman}
+\end{equation}
+%
+where $\mathcal{D}(d)$ is the direction set permitted by \eqref{eq:antiosc}. The
+optimal value is $\min_j V_0(j,0)$. The recursion costs
+$\mathcal{O}(N N_h S)$ with $S=2\lfloor \dot h_{\max}\Delta t/\Delta h\rfloor+1$
+the vertical branching factor. Because the arc costs \eqref{eq:arc-costs} do not
+depend on $\alpha$, an entire weighted-sum sweep re-solves only the recursion.
+
+\paragraph{Graph search.}
+The same scalarized problem is solved on the explicit directed graph whose nodes
+are the tuples $(d_i,h_j,h_{\mathrm{prev}},t_i)$, by Dijkstra's algorithm, by
+topological relaxation of the layered DAG, and by $A^\star$ with two heuristics:
+an admissible suffix-sum lower bound, and the exact backward-DP cost-to-go
+\eqref{eq:bellman}, which is a perfect heuristic and therefore expands only
+nodes lying on optimal paths. These solvers are exact optimizers of the same
+program and their agreement serves as a cross-validation.
+
+\paragraph{Exact multi-objective solve.}
+The full bi-objective problem \eqref{eq:biobjective} is solved in a single
+label-setting sweep over the layered DAG. Each state $(i,j,d)$ carries a set of
+mutually non-dominated labels $(F,C)$ with parent pointers; labels are
+propagated layer by layer and pruned by dominance. Merging the final layer
+yields the entire Pareto set $\mathcal{P}$, including its non-convex portions,
+without any scalarization grid.
+
+\paragraph{Continuous solve.}
+The continuous problem of Section~\ref{sec:cont} is transcribed by direct
+collocation and solved with an interior-point NLP solver, once per scalarization
+point. The program is non-convex, so each point is optionally solved from
+several randomised initial guesses (lateral and altitude jitter) and the best
+converged solution retained; the fuel-optimal solution serves as a warm start
+for the remaining weighted-sum points.
+
+\paragraph{Comparability of the fronts.}
+The discrete and continuous families do not minimise numerically identical
+functionals: the graph model uses the frozen mass profile $\bar m_i$ and a
+piecewise-constant evaluation of $c_\sigma$, whereas the continuous solver
+integrates the mass dynamics and the smooth interpolant along the true
+trajectory. All trajectories are therefore re-scored \emph{a posteriori} with a
+single shared evaluation of $\bigl(J_{\mathrm{fuel}},J_{\mathrm{cont}}\bigr)$,
+and it is these post-hoc metrics that are reported and plotted throughout.
+
+% =============================================================================
+%  Symbol table (optional --- delete if not wanted)
+% =============================================================================
+
+\begin{table}[t]
+  \centering
+  \caption{Principal symbols.}
+  \label{tab:symbols}
+  \begin{tabular}{ll}
+    \toprule
+    Symbol & Meaning \\
+    \midrule
+    $c_\sigma$                  & Gaussian-smoothed persistent-contrail cost field, Eq.~\eqref{eq:cost-field} \\
+    $\sigma$                    & smoothing bandwidth of the cost field \\
+    $M$, $\chi$                 & (fixed) Mach number and track angle \\
+    $h_{\min},h_{\max}$         & altitude bounds \\
+    $\dot h_{\max}$             & maximum climb / descent rate \\
+    $N$, $N_h$                  & number of waypoints and of flight levels \\
+    $\Delta h$, $\Delta t_i$    & altitude step, time step between waypoints \\
+    $\bar m_i$                  & precomputed (path-independent) mass profile \\
+    $f_{i,j\to j'}$, $g_{i,j\to j'}$ & fuel and contrail arc costs, Eq.~\eqref{eq:arc-costs} \\
+    $F$, $C$                    & total fuel and total contrail cost of a trajectory \\
+    $d_i$                       & vertical direction state, Eq.~\eqref{eq:antiosc} \\
+    $\alpha$                    & weighted-sum trade-off weight, Eq.~\eqref{eq:ws} \\
+    $\beta$, $F_0$              & fuel-slack fraction and fuel-optimal baseline, Eq.~\eqref{eq:eps} \\
+    $\mathcal{X}$, $\mathcal{P}$ & feasible set and Pareto set \\
+    \bottomrule
+  \end{tabular}
+\end{table}

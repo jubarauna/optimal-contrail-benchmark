@@ -1,0 +1,37 @@
+# OPTIMAL — cluster/batch dependencies (subset of requirements.txt).
+# Same packages as requirements.txt; kept separate for the offline wheelhouse install.
+#
+# Install offline on the cluster from a prebuilt wheelhouse:
+#     module load python/2023-3
+#     python -m venv .venv && source .venv/bin/activate
+#     pip install --no-index --find-links wheelhouse_linux -r requirements-cluster.txt
+
+# ── domain / optimization ────────────────────────────────────────────────────
+# gemseo removed: no project file imports it, and gemseo==6.3.0 pins numpy<=2.3.3
+#   which conflicts with numpy==2.4.6. pycontrails removed: unused (contrails.py
+#   uses openap.contrail, not pycontrails).
+openap==2.6.2
+opentop==2.7.0
+casadi==3.7.2
+networkx==3.5
+
+# ── flight data / meteo ──────────────────────────────────────────────────────
+traffic==2.13
+pyopensky==2.15
+fastmeteo==1.1.0
+xarray==2026.4.0
+zarr==2.18.7
+pyarrow==23.0.1
+gcsfs==2025.9.0
+fsspec==2025.9.0
+
+# ── scientific core ──────────────────────────────────────────────────────────
+numpy==2.4.6
+pandas==2.3.3
+scipy==1.17.1
+
+# ── plotting ─────────────────────────────────────────────────────────────────
+matplotlib==3.10.6
+Cartopy==0.25.0
+pyproj==3.7.2
+shapely==2.1.2

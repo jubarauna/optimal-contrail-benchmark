@@ -1,0 +1,48 @@
+# OPTIMAL — direct dependencies (pinned to the versions currently in .venv).
+#
+# Python 3.11 (dev env: 3.11.9).
+#
+# Recreate the environment on another PC:
+#     python -m venv .venv
+#     # Windows:  .venv\Scripts\activate
+#     # Linux/Mac: source .venv/bin/activate
+#     python -m pip install --upgrade pip
+#     python -m pip install -r requirements.txt
+#
+# This lists only what the code imports directly; pip resolves the transitive
+# deps. For a byte-for-byte identical environment instead, use the full lock:
+#     python -m pip install -r requirements.lock.txt
+#
+# Notes:
+#   * Cartopy needs GEOS/PROJ. The pinned wheels (pyproj/shapely) bundle them on
+#     Windows; on Linux install libgeos-dev / libproj-dev if a wheel is missing.
+#   * casadi ships as a binary wheel (used directly and by opentop).
+
+# ── domain / optimization ────────────────────────────────────────────────────
+openap==2.6.2
+opentop==2.7.0
+casadi==3.7.2
+networkx==3.5
+
+# ── flight data / meteo ──────────────────────────────────────────────────────
+traffic==2.13
+pyopensky==2.15
+fastmeteo==1.1.0
+xarray==2026.4.0
+zarr==2.18.7
+pyarrow==23.0.1
+# fastmeteo already requires gcsfs; pinned explicitly since the ERA5 remote
+# store is fetched over gcs (fsspec/gcsfs).
+gcsfs==2025.9.0
+fsspec==2025.9.0
+
+# ── scientific core ──────────────────────────────────────────────────────────
+numpy==2.4.6
+pandas==2.3.3
+scipy==1.17.1
+
+# ── plotting ─────────────────────────────────────────────────────────────────
+matplotlib==3.10.6
+Cartopy==0.25.0
+pyproj==3.7.2
+shapely==2.1.2
