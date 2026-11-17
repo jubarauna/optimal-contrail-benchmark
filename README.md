@@ -58,6 +58,28 @@ pip install -r requirements.txt                     # or requirements.lock.txt, 
 Python 3.11. On the cluster use `requirements-cluster.txt` (the same packages,
 installed offline from a prebuilt wheelhouse).
 
+## Credentials
+
+The benchmark itself needs none: it starts from the flight parquet in the Zenodo
+deposit, and ERA5 is read from the public ARCO-ERA5 store without a key.
+
+Only querying OpenSky directly needs an account (`FlightData.from_callsign` /
+`from_airports` in `src/data.py`, or re-downloading raw flights). Request
+access to the OpenSky Trino database, then put **your own** credentials in
+pyopensky's config file, never in the code:
+
+```ini
+[default]
+username = <your OpenSky username>
+password = <your OpenSky password>
+```
+
+The file is created on first import; this prints where it is:
+
+```bash
+python -c "import pyopensky.config as c; print(c.opensky_config_file)"
+```
+
 ## Documentation
 
 - [`docs/BENCHMARK.md`](docs/BENCHMARK.md) — what runs per flight, where the
