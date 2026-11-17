@@ -1,6 +1,6 @@
 # 2_Run — the benchmark itself
 
-Four solvers over the same 2 409 flights, the same grid
+Four solvers over the same 3 888 flights (`1_Flight_Selection/manifests/`), the same grid
 (`grid_era5_smoothed.parquet.gz`) and the same per-flight initial mass
 that stage 1 assigned. σ ∈ {0, 1, 2} is the smoothing of the contrail cost field.
 
