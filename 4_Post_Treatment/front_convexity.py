@@ -116,7 +116,7 @@ OPENTOP_SWEEPS = ("fuel_only", "weighted_sum", "epsilon_constraint")
 # means the count is not fixed: the DP_MuO returns its whole label set, so
 # the front length is a property of the flight, not of the sweep grid.
 #
-# The folder is the method's root under 3_Results/contrail/ and the glob reaches into
+# The folder is the method's root under 3_Results/contrail_2d_cruise/ and the glob reaches into
 # its m0 folders (m_060/, m_080/). The OpenTOP singlestart is start 0 of the multistart
 # run (extract_singlestart.py -> OpenTOP/Singlestart_start0/); its glob carries no
 # suffix so it never picks up an _ms or _fuel pickle.

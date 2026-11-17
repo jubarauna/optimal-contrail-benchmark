@@ -61,23 +61,23 @@ subpopulation.
 ### OpenTOP
 
 ```bash
-export M0=0.60 && sbatch --export=ALL studies/benchmarking/batch_opentop_full.sbatch
-export M0=0.80 && sbatch --export=ALL studies/benchmarking/batch_opentop_full.sbatch
+export M0=0.60 && sbatch --export=ALL 2_Run/run_opentop.sbatch
+export M0=0.80 && sbatch --export=ALL 2_Run/run_opentop.sbatch
 ```
 
 ### Graph-2D
 
 ```bash
-export M0=0.60 && sbatch --export=ALL studies/benchmarking/batch_graph2d.sbatch
-export M0=0.80 && sbatch --export=ALL studies/benchmarking/batch_graph2d.sbatch
+export M0=0.60 METHOD=dp && sbatch --export=ALL 2_Run/run_graph2d.sbatch
+export M0=0.80 METHOD=dp && sbatch --export=ALL 2_Run/run_graph2d.sbatch
 ```
 
 Second pass for whatever OOM'd, same file, flags overridden — no edit, no flight
 list, because `is_done()` skips everything the first pass wrote:
 
 ```bash
-export M0=0.60 && sbatch --nodes=16 --ntasks=16 --ntasks-per-node=1 \
-    --cpus-per-task=22 --export=ALL studies/benchmarking/batch_graph2d.sbatch
+export M0=0.60 METHOD=dp && sbatch --nodes=16 --ntasks=16 --ntasks-per-node=1 \
+    --cpus-per-task=22 --export=ALL 2_Run/run_graph2d.sbatch
 ```
 
 ### Changing σ
@@ -101,16 +101,16 @@ runs the **real** script against a small flight list, by pointing `OUT` (and, fo
 graph-2D, `SEL`) at a test directory:
 
 ```bash
-TEST=$PWD/studies/benchmarking/open_top_run/contrails_debug
+TEST=$PWD/3_Results/contrail_debug
 mkdir -p $TEST
-head -4 studies/benchmarking/open_top_run/contrails_full/flights_m006.txt \
+head -4 3_Results/flight_selection_2d_cruise/selection/flights_m006.txt \
     > $TEST/flights_m006.txt
 
 sbatch --partition=debug --nodes=1 --ntasks=2 --ntasks-per-node=2 \
        --cpus-per-task=11 --mem-per-cpu=3900M --time=00:30:00 \
        --job-name=dbg --mail-type=NONE \
        --export=ALL,M0=0.60,OUT=$TEST \
-       studies/benchmarking/batch_opentop_full.sbatch
+       2_Run/run_opentop.sbatch
 ```
 
 This exercises the exact `OUT`/`FLIGHTS` logic, the grid loading and the shard

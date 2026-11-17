@@ -19,7 +19,7 @@ The numbered folders are the stages, in order. Each has its own README.
 | [`0_Data/`](0_Data/) | OpenSky flights and the ERA5 cost grid; the whole-domain interpolant |
 | [`1_Flight_Selection/`](1_Flight_Selection/) | Fuel-only sweeps at m0 = 0.80 and 0.60; which flights enter the benchmark |
 | [`2_Run/`](2_Run/) | The four solvers, on the cluster or locally |
-| [`3_Results/`](3_Results/) | Every result: `flight_selection/` (stage 1) and `contrail/` (stage 2), not in git |
+| [`3_Results/`](3_Results/) | Every result: `flight_selection_2d_cruise/` (stage 1) and `contrail_2d_cruise/` (stage 2), not in git |
 | [`4_Post_Treatment/`](4_Post_Treatment/) | Figures, tables and the front-convexity analysis |
 
 `src/` is the shared library the stages import — flight and meteo access, the

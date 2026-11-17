@@ -11,9 +11,9 @@ Precedence: the FIRST ``--source`` holding a converged result for a flight wins.
 List the special-case runs first and the default run last::
 
     python 1_Flight_Selection/select_flights.py \\
-        --source 3_Results/flight_selection/fuel_wide_m060 \\
-        --source 3_Results/flight_selection/fuel_narrow_m080 \\
-        --out-dir 3_Results/flight_selection/selection
+        --source 3_Results/flight_selection_2d_cruise/fuel_wide_m060 \\
+        --source 3_Results/flight_selection_2d_cruise/fuel_narrow_m080 \\
+        --out-dir 3_Results/flight_selection_2d_cruise/selection
 
 Only flights that CONVERGED are copied: a non-converged warm start is the last
 IPOPT iterate, not an optimum, and seeding the Pareto sweeps with it would carry
@@ -33,8 +33,8 @@ Writes into ``--out-dir``:
 Then run the contrail sweeps over exactly that set::
 
     python 2_Run/batch_opentop.py --mode contrails \\
-        --out-dir 3_Results/flight_selection/selection \\
-        --flights $(cat 3_Results/flight_selection/selection/flights.txt)
+        --out-dir 3_Results/flight_selection_2d_cruise/selection \\
+        --flights $(cat 3_Results/flight_selection_2d_cruise/selection/flights.txt)
 """
 
 from __future__ import annotations

@@ -36,8 +36,8 @@ Usage
 -----
     # the same flights the OpenTOP run used, same masses
     python -m batch_graph2d --methods both \\
-        --flights-file 3_Results/flight_selection/selection/flights_m008.txt \\
-        --m0 0.80 --out-dir 3_Results/contrail/DP/m_080
+        --flights-file 3_Results/flight_selection_2d_cruise/selection/flights_m008.txt \\
+        --m0 0.80 --out-dir 3_Results/contrail_2d_cruise/DP/m_080
 
     # smoke test
     python -m batch_graph2d --limit 2 --methods dp

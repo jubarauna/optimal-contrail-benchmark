@@ -27,7 +27,7 @@ stops converging, so they are compared in three steps instead:
 Usage:
     python -m src.optimization.opentop.validate_track_cruise [--contrail]
     python -m src.optimization.opentop.validate_track_cruise \
-        --flights 3_Results/flight_selection/selection/flights.txt --limit 10
+        --flights 3_Results/flight_selection_2d_cruise/selection/flights.txt --limit 10
 
 Without --flights it runs the drive_opentop flight. With it, each flight's begin/end
 come from the dataset index and its actype/m0 from the manifest.csv next to the list.
@@ -298,7 +298,7 @@ def main() -> None:
     p.add_argument("--steps", default="123", help="steps to run, e.g. 13 (default 123)")
     p.add_argument("--flights", type=Path, default=None,
                    help="flight-id list (one per line), e.g. "
-                        "3_Results/flight_selection/selection/flights.txt; actype and m0 "
+                        "3_Results/flight_selection_2d_cruise/selection/flights.txt; actype and m0 "
                         "are read from the manifest.csv beside it")
     p.add_argument("--limit", type=int, default=None, help="only the first N flights of --flights")
     args = p.parse_args()

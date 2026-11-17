@@ -19,12 +19,12 @@
 #   FLEET=narrow sbatch --job-name=fuel_narrow 1_Flight_Selection/run_fuel_only.sbatch
 #   FLEET=wide   sbatch --job-name=fuel_wide   1_Flight_Selection/run_fuel_only.sbatch
 #
-# Results go to 3_Results/flight_selection/fuel_<fleet>_m<m0>/.
+# Results go to 3_Results/flight_selection_2d_cruise/fuel_<fleet>_m<m0>/.
 # The run is resumable: resubmit the same line and finished flights are skipped.
 #
 # Count converged flights afterwards, per type, without writing anything:
 #   python 1_Flight_Selection/select_flights.py --dry-run --rejected \
-#       --source 3_Results/flight_selection/fuel_wide_m060 --out-dir /tmp/unused
+#       --source 3_Results/flight_selection_2d_cruise/fuel_wide_m060 --out-dir /tmp/unused
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Size, 2026-09-25: 2 nodes on `short` for both fleets. 10 nodes on `medium`

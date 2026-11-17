@@ -5,12 +5,12 @@ Output only: no scripts live here, and nothing below this README is in git
 
 ```
 3_Results/
-├── flight_selection/          stage 1, 1_Flight_Selection/
-│   ├── fuel_narrow_m080/      fuel-only sweep, narrow bodies, m0 = 0.80
-│   ├── fuel_wide_m060/        fuel-only sweep, wide bodies,   m0 = 0.60
-│   └── selection/             flights.txt, flights_m008.txt, flights_m006.txt,
-│                              manifest.csv, rejected.csv
-└── contrail/                  stage 2, 2_Run/
+├── flight_selection_2d_cruise/  stage 1, 1_Flight_Selection/
+│   ├── fuel_narrow_m080/        fuel-only sweep, narrow bodies, m0 = 0.80
+│   ├── fuel_wide_m060/          fuel-only sweep, wide bodies,   m0 = 0.60
+│   └── selection/               flights.txt, flights_m008.txt, flights_m006.txt,
+│                                manifest.csv, rejected.csv
+└── contrail_2d_cruise/          stage 2, 2_Run/
     ├── DP/        m_060/  m_080/
     ├── DP_MuO/    m_060/  m_080/
     └── OpenTOP/   m_060/  m_080/

@@ -16,7 +16,7 @@
 #   TRACK_TOL=5000 bash 1_Flight_Selection/submit_selection.sh
 # Neither is in the directory names: the campaign runs ONE configuration, and each
 # result records its own in its context. A run with other settings needs the old
-# 3_Results/flight_selection/ moved away first, or is_done() skips the flights already there
+# 3_Results/flight_selection_2d_cruise/ moved away first, or is_done() skips the flights already there
 # -- or its own RES (below).
 #
 # If a sweep hits its time limit, the selection never starts (squeue shows it as

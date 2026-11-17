@@ -6,8 +6,8 @@ two campaigns (is_done() skips flights already present). This reads every pickle
 context and prints, per directory, each setting's distinct values and counts.
 A campaign-wide setting with more than one value is flagged MIXED.
 
-    python 2_Run/audit_out.py 3_Results/contrail/OpenTOP/m_080 3_Results/contrail/DP/m_080
-    python 2_Run/audit_out.py 3_Results/flight_selection/fuel_narrow_m080
+    python 2_Run/audit_out.py 3_Results/contrail_2d_cruise/OpenTOP/m_080 3_Results/contrail_2d_cruise/DP/m_080
+    python 2_Run/audit_out.py 3_Results/flight_selection_2d_cruise/fuel_narrow_m080
 
 Pass the OpenTOP and DP/DP_MuO directories of one campaign together and compare
 the columns: the benchmark is only fair if they agree.

@@ -269,7 +269,7 @@ TLABEL, OUTDIR = "solve", FIGDIR  # set by main()
 # directories, own cache, own output folder -- because the pickle name does NOT encode
 # the interpolant, so a figure mixing the two would look exactly like a correct one.
 #
-# (method, directory, glob). The directory is the method's root under 3_Results/contrail/
+# (method, directory, glob). The directory is the method's root under 3_Results/contrail_2d_cruise/
 # and the glob reaches into its m0 folders (m_060/, m_080/), so both masses are read.
 # The OpenTOP singlestart is start 0 of the multistart run, written by
 # extract_singlestart.py to OpenTOP/Singlestart_start0/ -- not the older Singlestart/
