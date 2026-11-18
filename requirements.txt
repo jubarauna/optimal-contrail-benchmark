@@ -1,6 +1,6 @@
 # OPTIMAL — direct dependencies (pinned to the versions currently in .venv).
 #
-# Python 3.11 (dev env: 3.11.9).
+# Python 3.12 (dev env: 3.12.11). The cluster wheelhouse is built for Python 3.11.
 #
 # Recreate the environment on another PC:
 #     python -m venv .venv

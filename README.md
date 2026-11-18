@@ -7,8 +7,7 @@ multi-objective label-setting solver that returns the whole Pareto front in one
 solve).
 
 No data or results are in this repository — 11.5 GB of flight parquets, meteo
-grids and solver pickles live in the Zenodo deposit (DOI: *to be filled at
-submission*). Each stage's README says what to download and where to put it.
+grids and solver pickles live in the Zenodo deposit (DOI: 10.5281/zenodo.24344602). Each stage's README says what to download and where to put it.
 
 ## Pipeline
 
@@ -60,8 +59,9 @@ python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\act
 pip install -r requirements.txt                     # or requirements.lock.txt, pinned
 ```
 
-Python 3.11. On the cluster use `requirements-cluster.txt` (the same packages,
-installed offline from a prebuilt wheelhouse).
+Python 3.12 (tested with 3.12.11). On the cluster use `requirements-cluster.txt` (the same
+packages, installed offline from the prebuilt `wheelhouse_linux/`, which is built for
+Python 3.11).
 
 ## Credentials
 

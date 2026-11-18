@@ -5,7 +5,7 @@ Pipeline = numbered stages 0_Data → 1_Flight_Selection → 2_Run → 4_Post_Tr
 `src/` is the shared library. Data/results are NOT in git (Zenodo).
 
 ## Run
-- Python 3.11, opentop pinned to 2.7.0 (TrackCruise refuses other versions).
+- Python 3.12 (cluster wheelhouse: 3.11), opentop pinned to 2.7.0 (TrackCruise refuses other versions).
 - Scripts run from repo root: `python 2_Run/batch_opentop.py --limit 2 --sigmas 2`
 - Cluster: follow docs/CLUSTER_CHECKLIST.md.
 
