@@ -786,7 +786,7 @@ if __name__ == "__main__":
         sigma=2,                        # 0 | 1 | 2
         opentop_dir="3_Results/contrail_2d_cruise/OpenTOP",
         dp_dir="3_Results/contrail_2d_cruise/DP",                  # None = no DP
-        dp_muo_dir="3_Results/contrail_2d_cruise/DP_MuO_retimed",  # None = no DP_MuO
+        dp_muo_dir="3_Results/contrail_2d_cruise/DP_MuO",          # None = no DP_MuO
         fuel_only=False,                 # True = opentop_dir holds fuel-only solves
         origin="Origin", destination="Destination",        # for the titles; None = left out
         save=False,

@@ -344,6 +344,7 @@ CAMPAIGNS = {
             ("opentop_single", CRUISE2D / "OpenTOP" / "Singlestart_start0", "m_0*/*_sigma[0-9].pkl.gz"),
             ("opentop_ms", CRUISE2D / "OpenTOP", "m_0*/*_sigma[0-9]_ms.pkl.gz"),
             ("dp", CRUISE2D / "DP", "m_0*/*_dp.pkl.gz"),
+            ("dp_muo", CRUISE2D / "DP_MuO", "m_0*/*_dp_muo.pkl.gz"),
         ],
         "population": tuple(
             BENCH.parent / "convergence" / "2d_cruise"

@@ -7,15 +7,16 @@ multi-objective label-setting solver that returns the whole Pareto front in one
 solve).
 
 No data or results are in this repository. The 2d_cruise campaign's inputs and
-results (about 2 GB) are in the Zenodo deposit,
-[10.5281/zenodo.24344602](https://doi.org/10.5281/zenodo.24344602), as four zips.
-Each keeps its repository path, so unzip all four into the repository root:
+results (about 2.2 GB) are in the Zenodo deposit,
+[10.5281/zenodo.24344602](https://doi.org/10.5281/zenodo.24344602), as five zips.
+Each keeps its repository path, so unzip all five into the repository root:
 
 | Zip | Size | Contents |
 |---|---|---|
 | `flight_data.zip` | 340 MB | `0_Data/flight_data/`: flight parquet and ERA5 contrail-cost grid |
 | `flight_selection_2d_cruise.zip` | 111 MB | `3_Results/flight_selection_2d_cruise/` (stage 1 fuel-only solves, flight lists) and `3_Results/convergence/2d_cruise/` |
 | `contrail_2d_cruise_DP.zip` | 45 MB | `3_Results/contrail_2d_cruise/DP/`: DP results |
+| `contrail_2d_cruise_DP_MuO.zip` | 245 MB | `3_Results/contrail_2d_cruise/DP_MuO/`: DP_MuO results |
 | `contrail_2d_cruise_OpenTOP.zip` | 1.5 GB | `3_Results/contrail_2d_cruise/OpenTOP/`: multistart and singlestart (start 0) results |
 
 The global interpolant (`global_interp_sigma2.casadi`) is not in the deposit: rebuild it
