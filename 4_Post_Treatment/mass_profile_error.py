@@ -71,7 +71,7 @@ Budget it: about one minute per (flight, coef) with the decision test on, so the
 default three coefs are ~3 min per flight. ``--sample 6`` is 18 flights, roughly an
 hour. Run it in the background and let the resume handle interruptions.
 
-Outputs (--out-dir, default <results_root>/figures/mass_profile/):
+Outputs (--out-dir, default 4_Post_Treatment/DP_mass_error/):
     mass_profile_error_<flight>_sigma<s>.csv    single flight: one row per coef
     mass_profile_edges_<flight>_sigma<s>.csv    single flight: per-edge (--edge-csv)
     mass_profile_error_<flight>_sigma<s>.png    the figure (--figures in a sweep)
@@ -120,7 +120,7 @@ for _stream in (sys.stdout, sys.stderr):
         pass
 
 BENCH = results_root()
-DEFAULT_OUT_DIR = BENCH / "figures" / "mass_profile"
+DEFAULT_OUT_DIR = PROJECT_ROOT / "4_Post_Treatment" / "DP_mass_error"
 TMP = Path(tempfile.gettempdir())
 
 # Haul categories for the stratified sample, on the great-circle distance between a
