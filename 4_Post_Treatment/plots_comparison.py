@@ -67,6 +67,11 @@ run each basis you want. Nothing else changes.
 Everything a campaign produces -- figures AND csvs -- lands under its own folder,
 figures/bspline_interp/ or figures/linear_interp/, so the two can never be read as
 one set. Writes <campaign>/[<basis>/]*.{png,pdf} and <campaign>/timings.csv.
+
+The figures themselves are then filed by paper section (each class's ``section``):
+4_Post_Treatment/<section>/<sweeps>/<campaign>/[<basis>/], with <section> one of
+Computing_time, Optimality, Fuel_study. The csvs and caches stay under figures/. The
+opentop_*_vs_dp_buckets figures go straight to 4_Post_Treatment/Optimality/, as before.
 """
 
 from __future__ import annotations
@@ -100,6 +105,10 @@ BENCH = results_root()
 FIGDIR = BENCH / "figures"
 # The OpenTOP-vs-DP optimality figures go here rather than to the campaign folder.
 OPTIMALITY_DIR = ROOT / "4_Post_Treatment" / "Optimality"
+# Every figure is saved under the paper section it belongs to (its class's ``section``):
+# 4_Post_Treatment/<section>/<the same sub-path it has under FIGDIR>, so the
+# sweep / campaign / time-basis folders are kept and two runs never overwrite each other.
+SECTIONS_ROOT = ROOT / "4_Post_Treatment"
 CACHE = FIGDIR / "timings.csv"          # shared by every basis; --refresh rebuilds it
 
 # ── print size ───────────────────────────────────────────────────────────────
@@ -917,6 +926,7 @@ class Plot:
 
     stem = ""
     outdir = None          # None -> OUTDIR (the --time folder); set to pin a folder
+    section = None         # paper section folder under 4_Post_Treatment/; set per figure
 
     # ── the pinned slice (opt-in, per figure) ────────────────────────────────
     # A figure that must NOT follow the run's flags declares it here: the one sigma it
@@ -947,11 +957,22 @@ class Plot:
         fig = self.draw()
         if fig.get_layout_engine() is None:      # a constrained-layout figure places itself
             fig.tight_layout()
+        folder = self.figure_dir()
+        folder.mkdir(parents=True, exist_ok=True)
         for ext in ("png", "pdf"):
-            fig.savefig((self.outdir or OUTDIR) / f"{self.stem}.{ext}", dpi=self.dpi,
+            fig.savefig(folder / f"{self.stem}.{ext}", dpi=self.dpi,
                         bbox_inches="tight", facecolor=SURFACE)
-            print(f"wrote {self.stem}.{ext}")
+            print(f"wrote {folder / self.stem}.{ext}")
         plt.close(fig)
+
+    def figure_dir(self) -> Path:
+        """Where this figure is saved: its paper section, same sub-path as under FIGDIR."""
+        folder = self.outdir or OUTDIR
+        try:
+            rel = folder.relative_to(FIGDIR)
+        except ValueError:          # already a section folder (OPTIMALITY_DIR)
+            return folder
+        return SECTIONS_ROOT / self.section / rel
 
     def draw(self):
         raise NotImplementedError
@@ -1201,6 +1222,8 @@ class TimeDistribution(Plot):
     and the flag is global, so a run that got this figure right would get the rest wrong.
     """
 
+    section = "Computing_time"
+
     stem = "solve_time_distribution"
     pin_sigma, pin_campaign, pin_population = 2.0, BSPLINE_CAMPAIGNS, "default"
 
@@ -1284,6 +1307,8 @@ class TimeAndCount(Plot):
     setting. Reading the top row alone is what makes a solve-time ratio misleading.
     """
 
+    section = "Computing_time"
+
     stem = "solve_time_and_count"
 
     def draw(self):
@@ -1352,6 +1377,8 @@ class FrontSizeDistribution(Plot):
     way — but the flight count can differ by a pickle or two between campaigns, so n is
     printed per panel.
     """
+
+    section = "Computing_time"
 
     stem = "front_size_distribution"
     key = "dp_muo"
@@ -1502,6 +1529,8 @@ class Scalability(Plot):
     is left to compare them by.
     """
 
+    section = "Computing_time"
+
     stem = "solve_time_vs_size"
     # The same pinned slice as TimeDistribution and MemoryDistribution -- read the first
     # of those docstrings for why. This figure already drew sigma=2 alone (the old
@@ -1649,6 +1678,8 @@ class MemoryDistribution(Plot):
 
     Disk has no such floor: it is the gzip'd pickle and nothing else.
     """
+
+    section = "Computing_time"
 
     stem = "memory_and_disk"
     # "RAM (MB)", by request, on BOTH figures. The consequence to be aware of: this row
@@ -2244,6 +2275,8 @@ class JointPareto(Plot):
     comparison, and the reason the four are pooled before the mask rather than after.
     """
 
+    section = "Optimality"
+
     stem = "joint_pareto_front"
     sigma = 2.0
     methods = None          # None -> every solver in SOURCES
@@ -2640,6 +2673,8 @@ class HeadToHeadBuckets(Plot):
     points of the same flight at the same sweep coordinate are the same problem solved
     twice, which is the only fair way to ask which start strategy is better.
     """
+
+    section = "Optimality"
 
     stem = "ms_vs_ss_buckets"
     sigma = 2.0
@@ -3077,6 +3112,8 @@ class OwnPareto(Plot):
     the trade-off and the vertical extent for how much the flights differ.
     """
 
+    section = "Optimality"
+
     sigma = 2.0
 
     @property
@@ -3176,6 +3213,8 @@ class BudgetScatter(Plot):
     contrail. Neither is a truncation.
     """
 
+    section = "Fuel_study"
+
     def __init__(self, df: pd.DataFrame, key: str, name: str):
         super().__init__(df)
         self.key, self.name = key, name
@@ -3271,6 +3310,8 @@ class ParetoSpread(Plot):
     carries the same ``front_total_s``. DP and OpenTOP pay per Pareto point;
     DP_MuO pays once for the front.
     """
+
+    section = "Computing_time"
 
     stem = "pareto_spread"
     # A property, not `outdir = SPREADDIR`: a class attribute is evaluated at import,
