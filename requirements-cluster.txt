@@ -8,7 +8,7 @@
 
 # ── domain / optimization ────────────────────────────────────────────────────
 # gemseo removed: no project file imports it, and gemseo==6.3.0 pins numpy<=2.3.3
-#   which conflicts with numpy==2.4.6. pycontrails removed: unused (contrails.py
+#   which conflicts with numpy==2.4.6. pycontrails removed: unused (src/contrails/conditions.py
 #   uses openap.contrail, not pycontrails).
 openap==2.6.2
 opentop==2.7.0

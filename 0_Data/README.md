@@ -44,7 +44,7 @@ python 0_Data/build_global_interpolant.py  # cost grid -> whole-domain interpola
 
 `build_global_interpolant.py` is only the CLI. The two functions the solver
 batches call — `load_global_interpolant` and `shift_interpolant` — live in
-`src/interpolant.py`, because a folder named `0_Data` is not a Python
+`src/contrails/interpolant.py`, because a folder named `0_Data` is not a Python
 identifier and cannot be imported.
 
 A run that passes `--global-interp` is **not comparable point by point** with a

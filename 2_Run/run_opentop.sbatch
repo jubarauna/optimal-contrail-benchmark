@@ -235,7 +235,7 @@ export GLOBAL_INTERP="${GLOBAL_INTERP-1}"
 export GLOBAL_INTERP_DIR="${GLOBAL_INTERP_DIR:-}"
 if [ -n "$GLOBAL_INTERP" ]; then
     # Every sigma needs its file for this shape — found missing here, not after the
-    # queue wait. Same naming rule as src/interpolant.py:_paths.
+    # queue wait. Same naming rule as src/contrails/interpolant.py:_paths.
     if [ "$INTERP" = bspline ]; then GI_PREFIX=global; else GI_PREFIX="global_${INTERP}"; fi
     GI_DIR="${GLOBAL_INTERP_DIR:-$(dirname "$GRID")}"
     for S in $SIGMAS; do

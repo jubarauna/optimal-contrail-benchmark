@@ -46,13 +46,14 @@ import pandas as pd  # noqa: E402
 from openap.aero import ft  # noqa: E402
 
 from src.config import DEFAULT_DATA_PATH  # noqa: E402
-from src.data import FlightData  # noqa: E402
-from src.flights import ensure_flight_slice  # noqa: E402
-from src.interpolant import load_global_interpolant, shift_interpolant  # noqa: E402
-from src.models.grid.contrail_grid import real_flight_route  # noqa: E402
+from src.data.traffic import FlightData  # noqa: E402
+from src.data.flights import ensure_flight_slice  # noqa: E402
+from src.contrails.interpolant import load_global_interpolant, shift_interpolant  # noqa: E402
+from src.data.route import real_flight_route  # noqa: E402
 from src.postprocess.evaluation import (  # noqa: E402
-    contrail_integral, flown_ts, fuel_burn, route_latlon,
+    contrail_integral, flown_ts, route_latlon,
 )
+from src.performance.aircraft import fuel_burn  # noqa: E402
 
 SRC = PROJECT_ROOT / "3_Results" / "contrail_2d_cruise" / "DP"
 PHASE = {"fuel_only": "anchor", "weighted_sum": "ws", "epsilon_constraint": "eps"}

@@ -21,7 +21,7 @@ gzip'd pickle per unit of work** that you post-treat directly.
 | `batch_opentop.py` | OpenTOP batch runner. Flights × σ; slices meteo, builds a per-flight interpolant + cruise (no wind in the solve), runs the fuel-only warm start and/or the two Pareto sweeps. Resumable. |
 | `batch_opentop_full.sbatch` | **The OpenTOP submission script in use.** `--mode full`, sized for memory, `OUT`/`FLIGHTS` hardcoded. |
 | `batch_opentop.sbatch`, `batch_opentop_m0.sbatch` | Older submission scripts. **Not sized for memory** — see [Memory](#memory-read-this-before-sizing-any-job). |
-| `batch_graph2d.py` | DP + DP_MuO batch runner. Flights × σ × method. Shares `ensure_flight_slice` / `load_flight_index` (`src/flights.py`), `log_progress` (`src/instrument.py`) and `WS_GRID` / `EPS_GRID` / `M0` / `ALT_BUFFER_*` (`src/config.py`) with the OpenTOP batch, so the two have the same flight handling and sweep grids by construction. |
+| `batch_graph2d.py` | DP + DP_MuO batch runner. Flights × σ × method. Shares `ensure_flight_slice` / `load_flight_index` (`src/data/flights.py`), `log_progress` (`src/instrument.py`) and `WS_GRID` / `EPS_GRID` / `M0` / `ALT_BUFFER_*` (`src/config.py`) with the OpenTOP batch, so the two have the same flight handling and sweep grids by construction. |
 | `batch_graph2d.sbatch` | The graph-2D submission script. |
 | `instrument.py` | `phase()` context manager — per-phase wall time and RSS, recorded into every pickle. Imported by both runners. |
 | `prepare_contrails_input.sbatch` | Builds the flight lists `flights_m006.txt` / `flights_m008.txt`. Run this first; everything else consumes them. |
@@ -140,7 +140,7 @@ Per task, per flight:
 | OpenTOP only: IPOPT with an exact Hessian (selected by the interpolant's presence) | large |
 | graph-2D only: `df_cost` plus the `(n−1, n_alts, span)` edge tables | modest |
 
-`GridWeather.__init__` (`src/data.py`) loads the grid file once and keeps it, in
+`GridWeather.__init__` (`src/data/meteo.py`) loads the grid file once and keeps it, in
 every task, regardless of which flights that task handles. σ=0, 1 and 2 are all
 columns of that one file, so the σ list does not change grid memory. The peaks
 measured below predate this: σ=1 then came from a second file, ~1.5 GB more per
@@ -349,7 +349,7 @@ Both `ALT_BUFFER_*`, `M0`, `WS_GRID` and `EPS_GRID` are imported from
 between the two batches.
 
 **These two constants pin the time step, and it cannot be made finer.** The route
-point count (`contrail_grid.py:132`) is
+point count (`route_point_count`, `src/data/route.py:144`) is
 
 ```python
 num_points = floor(roc * total_distance_km * 1000 / (tas_ms * alt_step_ft * 60))
@@ -527,7 +527,7 @@ df = pd.DataFrame(rows)
 ## Meteo: the precomputed grid
 
 Both batches read the precomputed contrail-cost + wind grid and slice each
-flight's cost grid from it (`GridWeather`, `data/data.py`) — no per-flight ERA5
+flight's cost grid from it (`GridWeather`, `src/data/meteo.py`) — no per-flight ERA5
 fetch, no runtime smoothing. The cost for each σ:
 
 | σ | source |
@@ -573,8 +573,9 @@ so the child `bash` inherits them.
 - **`python` on the compute nodes is system Python 2.** For one-off commands
   outside the batch, use `.conda-optimal/bin/python` explicitly.
 - **Transfer every module the runner needs, and check they are current.**
-  `batch_graph2d.py` additionally needs `instrument.py`, `contrail_grid.py`,
-  `model_2D.py` and `evaluation.py`. A *stale* file is worse than a missing one:
+  `batch_graph2d.py` additionally needs `instrument.py`, `data/route.py`,
+  `optimization/environment.py`, `performance/aircraft.py`, `model_2D.py` and
+  `evaluation.py`. A *stale* file is worse than a missing one:
   a missing module raises `ModuleNotFoundError`, but an old `model_2D.py` runs
   silently against an outdated solver. Compare sizes and dates, not just presence.
 - **`ensure_flight_slice` is not atomic** (`batch_opentop.py:140-147`):

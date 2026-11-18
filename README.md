@@ -32,12 +32,17 @@ src/
 ├── paths.py         ROOT and the data/result directories, resolved once
 ├── config.py        the settings that define a campaign (m0, altitude window,
 │                    sweep grids, the 26 excluded flights)
-├── flights.py       flight index and per-flight parquet cache
-├── interpolant.py   the whole-domain cost interpolant (build / load / shift)
 ├── instrument.py    wall-time and peak-RSS phases, progress.csv
-├── data.py          FlightData, GridWeather
-├── models/          contrail model and cost grid
-├── optimization/    graph_based/model_2D.py (DP, DP_MuO), opentop/
+├── data/            flights.py  flight index and per-flight parquet cache
+│                    traffic.py  FlightData (OpenSky / parquet flights)
+│                    meteo.py    WeatherData (live ERA5), GridWeather (precomputed grid)
+│                    route.py    great-circle and real-flight routes
+├── contrails/       conditions.py   SAC / ISSR persistence
+│                    cost_grid.py    prepare_grid (σ-smoothed cost grid)
+│                    interpolant.py  the whole-domain cost interpolant (build / load / shift)
+├── performance/     aircraft.py  OpenAP aircraft data, fuel/thrust/drag models, fuel_burn
+├── optimization/    environment.py (ContrailEnvironmentFromGrid),
+│                    graph_based/model_2D.py (DP, DP_MuO), opentop/
 └── postprocess/     evaluation and plotting helpers
 ```
 
@@ -64,7 +69,7 @@ The benchmark itself needs none: it starts from the flight parquet in the Zenodo
 deposit, and ERA5 is read from the public ARCO-ERA5 store without a key.
 
 Only querying OpenSky directly needs an account (`FlightData.from_callsign` /
-`from_airports` in `src/data.py`, or re-downloading raw flights). Request
+`from_airports` in `src/data/traffic.py`, or re-downloading raw flights). Request
 access to the OpenSky Trino database, then put **your own** credentials in
 pyopensky's config file, never in the code:
 

@@ -64,7 +64,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from openap import prop
 from openap.aero import ft
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -75,14 +74,14 @@ from src.config import (  # noqa: E402
     ALT_BUFFER_FT_MAX, ALT_BUFFER_FT_MIN, ALT_STEP_FT, DEFAULT_DATA_PATH,
     DEFAULT_GRID_PATH, M0, MAX_ROC_FPM, WS_GRID, level_window,
 )
-from src.flights import ensure_flight_slice, load_flight_index  # noqa: E402
+from src.data.flights import ensure_flight_slice, load_flight_index  # noqa: E402
 from src.instrument import log_progress  # noqa: E402
 from src.paths import RUN_DIR  # noqa: E402
-from src.data import FlightData, GridWeather  # noqa: E402
-from src.models.grid.contrail_grid import (  # noqa: E402
-    ContrailEnvironmentFromGrid,
-    real_flight_route,
-)
+from src.data.traffic import FlightData  # noqa: E402
+from src.data.meteo import GridWeather  # noqa: E402
+from src.optimization.environment import ContrailEnvironmentFromGrid  # noqa: E402
+from src.performance.aircraft import aircraft  # noqa: E402
+from src.data.route import real_flight_route  # noqa: E402
 from src.optimization.graph_based.model_2D import (  # noqa: E402
     DpOptimizer,
     DpMuoOptimizer,
@@ -219,7 +218,7 @@ def _worker_init(grid_path: str, sigmas: list[float],
     if global_interp_dir is not None:
         # Imported here, not at module scope: build_global_interpolant is only needed
         # when the flag is on, and a missing copy of it must not break every run.
-        from src.interpolant import load_global_interpolant
+        from src.contrails.interpolant import load_global_interpolant
         # One fit for the whole domain, in ABSOLUTE time; per flight it is composed
         # with a constant shift instead of being refitted (164 s median per flight).
         # Loaded once per worker: each file is ~176 MB and the object is read-only.
@@ -270,11 +269,11 @@ def build_environment(meta: dict, sigma: float, flight_slice: Path, domain_meteo
         # so a directory mixing the two is not comparable. interpolant_shape below
         # records which was used, because the filename does not.
         if global_interp is not None:
-            from src.interpolant import shift_interpolant
+            from src.contrails.interpolant import shift_interpolant
             _g, _gmeta = global_interp
             interpolant = shift_interpolant(_g, meta["begin"], _gmeta)
         # No sigma here on purpose: fd.interpolant only rebuilds the cost grid when it is
-        # given one (data/data.py:500), and cost_grid() above already cached it in
+        # given one (src/data/traffic.py:501), and cost_grid() above already cached it in
         # fd._df_cost. Passing sigma would assemble the same 131k-row frame twice and put
         # the second assembly inside interpolant_s, which is then not comparable to the
         # OpenTOP batch's.
@@ -290,8 +289,8 @@ def build_environment(meta: dict, sigma: float, flight_slice: Path, domain_meteo
         # great circle (OpenTOP pins the same path with follow_track).
         cruise_alt_ft = float(fd.flight.data.altitude.mean())
         mach = fd.compute_cruise_mach()
-        ceiling_ft = float(prop.aircraft(actype, use_synonym=True)["limits"]["ceiling"]) / ft
-        mtow_kg = float(prop.aircraft(actype, use_synonym=True)["mtow"])
+        ceiling_ft = float(aircraft(actype)["limits"]["ceiling"]) / ft
+        mtow_kg = float(aircraft(actype)["mtow"])
         mass_init_kg = m0 * mtow_kg
 
         # Snap the window to whole flight levels: the graph's altitudes are discrete
@@ -531,7 +530,7 @@ def plot_cost_field(meta: dict, sigmas: list[float], flight_slice: Path, domain_
     """One figure of ``env.cost_map`` per (interpolation shape x sigma) for one flight.
 
     This is the field the graph solvers actually optimise over — not the raw grid.
-    ``ContrailEnvironmentFromGrid._sample_along_route`` (contrail_grid.py:243) fills
+    ``ContrailEnvironmentFromGrid._sample_along_route`` (src/optimization/environment.py:35) fills
     ``cost_map`` by CALLING THE INTERPOLANT at every (route point, flight level), so
     the shape is not a detail of how OpenTOP differentiates it: linear and bspline
     hand the DP and DP_MuO different numbers on the same grid, and the two

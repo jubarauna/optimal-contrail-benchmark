@@ -36,20 +36,20 @@ from typing import Optional
 import numpy as np
 import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import dijkstra_path
-from src.models.grid.contrail_grid import real_flight_route, real_flight_baseline
-from openap import aero, FuelFlow, Thrust, Drag
+from src.data.route import real_flight_route, real_flight_baseline
+from openap import aero
+from src.performance.aircraft import aircraft as ac_props, fuel_flow_model, thrust_model, drag_model
 from openap.aero import ft, kts
 import tempfile
 import opentop as top
-from src.data import FlightData
-from src.models.climate.contrails import agg_conditions
+from src.data.traffic import FlightData
+from src.contrails.conditions import agg_conditions
 from pathlib import Path
 import os
-from src.models.grid.contrail_grid import prepare_grid
-from src.models.grid.contrail_grid import ContrailEnvironmentFromGrid
+from src.contrails.cost_grid import prepare_grid
+from src.optimization.environment import ContrailEnvironmentFromGrid
 from src.optimization.base import BaseOptimizer, OptResult
 from src.postprocess.evaluation import evaluate_path
-from openap import prop
 import time
 import matplotlib.pyplot as plt
 from src.postprocess.plots import plot_cost_map
@@ -131,10 +131,10 @@ class _model_2D_base(BaseOptimizer):
         self.max_descent_rate_fpm = max_descent_rate_fpm
         self.actype = actype
 
-        self.fuel_model  = FuelFlow(actype, wave_drag=True, use_synonym=True, force_engine=True)
-        self.thrust_model = Thrust(actype, use_synonym=True, force_engine=True)
-        self.drag_model  = Drag(actype,   wave_drag=True, use_synonym=True, force_engine=True)
-        aircraft = prop.aircraft(actype, use_synonym=True)
+        self.fuel_model  = fuel_flow_model(actype)
+        self.thrust_model = thrust_model(actype)
+        self.drag_model  = drag_model(actype)
+        aircraft = ac_props(actype)
         self.S   = aircraft["wing"]["area"]
         polar    = self.drag_model.polar["clean"]
         self.cd0 = polar["cd0"]
@@ -1114,7 +1114,7 @@ if __name__ == "__main__":
         min_alt_ft=MIN_ALT_FT,
         max_alt_ft=MAX_ALT_FT,
     )
-    aircraft = prop.aircraft(actype, use_synonym=True)
+    aircraft = ac_props(actype)
 
     opt = model_2D_graph_based(
     environment = env,

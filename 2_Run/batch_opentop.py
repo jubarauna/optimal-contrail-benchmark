@@ -95,11 +95,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.models.grid.contrail_grid import real_flight_route, route_point_count  # noqa: E402
+from src.data.route import real_flight_route, route_point_count  # noqa: E402
 from src.postprocess.evaluation import reprice  # noqa: E402
 
 import opentop as top
-from src.data import FlightData, GridWeather
+from src.data.traffic import FlightData
+from src.data.meteo import GridWeather
 from src.optimization.opentop.opentop_optimizer import OpenTOPOptimizer
 from src.instrument import four_times, log_progress, phase
 
@@ -117,7 +118,7 @@ TMP = Path(tempfile.gettempdir())
 
 
 # ── flight discovery ─────────────────────────────────────────────────────────
-from src.flights import ensure_flight_slice, load_flight_index  # noqa: E402
+from src.data.flights import ensure_flight_slice, load_flight_index  # noqa: E402
 
 
 # ── output helpers ───────────────────────────────────────────────────────────
@@ -351,7 +352,7 @@ def run_one_flight(meta: dict, sigma: float, flight_slice: Path, out_dir: Path,
                 # uniform ~2e-4 residual — and the OUTPUT FILENAME DOES NOT SAY SO. Pair
                 # every global run with its own --out-dir; interpolant_mode below is the
                 # only record inside the pickle.
-                from src.interpolant import shift_interpolant
+                from src.contrails.interpolant import shift_interpolant
                 _g, _gmeta = global_interp
                 interpolant = shift_interpolant(_g, meta["begin"], _gmeta)
                 interpolant_mode = f"global_{_gmeta.get('shape', 'unknown')}"
@@ -704,13 +705,13 @@ def _worker_init(grid_path: str, sigmas: list[float],
     if global_interp_dir is not None:
         # Lazy, like the shift in run_one_flight: --global-interp is optional and a
         # missing build_global_interpolant must not break a per-flight run.
-        from src.interpolant import load_global_interpolant
+        from src.contrails.interpolant import load_global_interpolant
         # Keyed by SIGMA. One entry per sigma the job runs, never one shared entry:
         # a single interpolant reused across sigmas would solve one sigma's flights
         # against another sigma's field and write them under the right filename, with
         # nothing in the pickle to show it. ~176 MB each, read-only, loaded once per
         # worker process. --interp picks WHICH global fit: global_interp_sigma<s> for
-        # bspline, global_linear_interp_sigma<s> for linear (src.interpolant._paths).
+        # bspline, global_linear_interp_sigma<s> for linear (src.contrails.interpolant._paths).
         for sg in sigmas:
             _WORKER_GINTERP[float(sg)] = load_global_interpolant(
                 sigma=sg, out_dir=Path(global_interp_dir), shape=interp)

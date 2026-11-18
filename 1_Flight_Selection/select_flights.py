@@ -56,7 +56,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.config import (  # noqa: E402
     DEFAULT_DATA_PATH, M0, M0_WIDEBODY, WIDEBODY_TYPES,
 )
-from src.flights import load_flight_index  # noqa: E402
+from src.data.flights import load_flight_index  # noqa: E402
 
 
 def read_source(source: Path, sigma: float, multistart: bool = False) -> dict[str, dict]:

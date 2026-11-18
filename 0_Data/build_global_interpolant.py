@@ -41,7 +41,7 @@ The grid column follows from sigma, exactly as for the per-flight fit
 
 Later, in an optimization
 -------------------------
-    from src.interpolant import (
+    from src.contrails.interpolant import (
         load_global_interpolant, shift_interpolant)
 
     interp, meta = load_global_interpolant(sigma=2)                    # bspline
@@ -62,7 +62,7 @@ if str(ROOT) not in sys.path:
 
 # The importable half lives in src/interpolant.py: both solver batches load the
 # interpolant this script writes, and neither can import 0_Data (not an identifier).
-from src.interpolant import DEFAULT_GRID_PATH, build_global_interpolant  # noqa: E402
+from src.contrails.interpolant import DEFAULT_GRID_PATH, build_global_interpolant  # noqa: E402
 
 
 def main() -> None:

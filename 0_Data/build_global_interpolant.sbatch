@@ -49,7 +49,7 @@ SHAPE="${SHAPE:-bspline}"
 echo "sigmas=$SIGMAS shape=$SHAPE"
 /usr/bin/time -v python 0_Data/build_global_interpolant.py --sigma $SIGMAS --shape "$SHAPE" --rebuild
 
-# Same naming rule as src/interpolant.py:_paths.
+# Same naming rule as src/contrails/interpolant.py:_paths.
 if [ "$SHAPE" = bspline ]; then PREFIX=global; else PREFIX="global_${SHAPE}"; fi
 echo
 for S in $SIGMAS; do

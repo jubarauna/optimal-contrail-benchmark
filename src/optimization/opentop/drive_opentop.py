@@ -15,11 +15,13 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8")
     except Exception:  # noqa: BLE001 — best effort; older/foreign stream types
         pass
-from src.models.grid.contrail_grid import prepare_grid, real_flight_route
+from src.contrails.cost_grid import prepare_grid
+from src.data.route import real_flight_route
 import numpy as np
 from openap.aero import ft
-from src.data import FlightData, GridWeather
-from src.models.climate.contrails import agg_conditions
+from src.data.traffic import FlightData
+from src.data.meteo import GridWeather
+from src.contrails.conditions import agg_conditions
 from src.optimization.opentop.opentop_optimizer import OpenTOPOptimizer
 from src.optimization.base import BaseOptimizer, OptResult
 

@@ -49,9 +49,9 @@ from openap.aero import fpm, ft, kts
 import pandas as pd
 
 from src.config import DEFAULT_DATA_PATH
-from src.data import FlightData
-from src.flights import load_flight_index
-from src.models.grid.contrail_grid import real_flight_route
+from src.data.traffic import FlightData
+from src.data.flights import load_flight_index
+from src.data.route import real_flight_route
 from src.optimization.opentop.track_cruise import TrackCruise
 
 # The drive_opentop flight, run when no --flights list is given.

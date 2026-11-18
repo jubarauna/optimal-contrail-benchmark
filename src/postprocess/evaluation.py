@@ -1,7 +1,8 @@
 import numpy as np
-from src.models.grid.contrail_grid import ContrailEnvironmentFromGrid
-from openap.aero import ft, kts
-from openap import aero, FuelFlow
+from src.optimization.environment import ContrailEnvironmentFromGrid
+from openap.aero import ft
+from openap import aero
+from src.performance.aircraft import fuel_burn
 
 # ──────────────────────────────────────────────────────────────────────────────
 # POST-HOC EVALUATION  (shared between A* and OpenAP)
@@ -57,30 +58,6 @@ def flown_ts(alt_ft, distances_km, mach: float) -> np.ndarray:
     mid = (alt_ft[:-1] + alt_ft[1:]) / 2.0
     dt = np.diff(np.asarray(distances_km, dtype=float)) * 1000.0 / aero.mach2tas(mach, mid * ft)
     return np.concatenate([[0.0], np.cumsum(dt)])
-
-
-def fuel_burn(alt_ft, ts_s, mach: float, mass_init_kg: float,
-              actype: str = "A320") -> tuple[float, float]:
-    """(fuel kg, final mass kg) along a trajectory: the ONE fuel measure for every solver.
-
-    Per segment, OpenAP's en-route fuel flow at the mid-segment altitude, the TAS of
-    the fixed cruise Mach there, the segment's vertical speed and the mass left at its
-    start, times the segment duration; mass is depleted segment by segment.
-    """
-    ff_model = FuelFlow(actype, wave_drag=True, use_synonym=True, force_engine=True)
-    total_fuel_kg = 0.0
-    mass = mass_init_kg
-    for i in range(len(alt_ft) - 1):
-        avg_alt = (alt_ft[i] + alt_ft[i + 1]) / 2.0
-        dt = ts_s[i + 1] - ts_s[i]
-        vs = (alt_ft[i + 1] - alt_ft[i]) / (dt / 60.0)
-        tas = aero.mach2tas(mach, avg_alt * ft) / kts
-
-        ff = ff_model.enroute(mass=mass, tas=tas, alt=avg_alt, vs=vs)
-        fuel = max(0.0, ff) * dt
-        total_fuel_kg += fuel
-        mass -= fuel                                          # deplete mass
-    return total_fuel_kg, mass
 
 
 def reprice(res, interpolant, mach: float, mass_init_kg: float, actype: str) -> None:

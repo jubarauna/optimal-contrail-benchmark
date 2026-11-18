@@ -23,11 +23,11 @@ import opentop as top
 import time
 from pathlib import Path
 import os
-from src.models.grid.contrail_grid import prepare_grid
+from src.contrails.cost_grid import prepare_grid
 import numpy as np
 from openap.aero import ft
-from src.data import FlightData
-from src.models.climate.contrails import agg_conditions
+from src.data.traffic import FlightData
+from src.contrails.conditions import agg_conditions
 from src.optimization.base import BaseOptimizer, OptResult
 
 

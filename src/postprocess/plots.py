@@ -3,19 +3,20 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from openap import aero, FuelFlow
-from openap.aero import ft, kts
+from openap import aero
+from src.performance.aircraft import cumulative_fuel
+from openap.aero import ft
 from matplotlib import cm
 from matplotlib.gridspec import GridSpec
 import cartopy.crs as ccrs
 from cartopy.feature import OCEAN, LAND, BORDERS
 from scipy.interpolate import RegularGridInterpolator
 
-from src.models.grid.contrail_grid import ContrailEnvironmentFromGrid
+from src.optimization.environment import ContrailEnvironmentFromGrid
 import tempfile
-from src.data import FlightData
+from src.data.traffic import FlightData
 from src.paths import DATA_DIR, RUN_DIR
-from src.models.grid.contrail_grid import ContrailEnvironmentFromGrid
+from src.optimization.environment import ContrailEnvironmentFromGrid
 from openap.aero import ft
 # Tools -----------------------------------------------------------------------------------------------------------------
 
@@ -1133,21 +1134,6 @@ def plot_benchmarking_results(dp, opentop, save_dir=None, alt_min_ft=None, alt_m
         return float(env_cost_map[di, ai])
 
     # ── DP cumulative fuel (per-edge, with real mass depletion) ───────────
-    def compute_cum_fuel(alt_ft, ts_s, mach, mass_init_kg, actype):
-        ff_model = FuelFlow(actype, wave_drag=True, use_synonym=True, force_engine=True)
-        cum  = [0.0]
-        mass = mass_init_kg
-        for i in range(len(alt_ft) - 1):
-            avg_alt = (alt_ft[i] + alt_ft[i + 1]) / 2.0
-            dt  = ts_s[i + 1] - ts_s[i]
-            vs  = (alt_ft[i + 1] - alt_ft[i]) / (dt / 60.0)
-            tas = aero.mach2tas(mach, avg_alt * ft) / kts
-            ff  = ff_model.enroute(mass=mass, tas=tas, alt=avg_alt, vs=vs)
-            fuel = max(0.0, ff) * dt
-            cum.append(cum[-1] + fuel)
-            mass -= fuel
-        return np.array(cum)
-
     # ── Build processed DP trajectory list ────────────────────────────────
     dp_trajs = []
     for rec in dp_list:
@@ -1156,7 +1142,7 @@ def plot_benchmarking_results(dp, opentop, save_dir=None, alt_min_ft=None, alt_m
         dp_ts   = np.array(rec["ts_s"])
         coef    = rec.get("Coef", rec.get("coef", 0.0))
 
-        fuel_cum = compute_cum_fuel(dp_alt, dp_ts, MACH, MASS, ACTYPE)
+        fuel_cum = cumulative_fuel(dp_alt, dp_ts, MACH, MASS, ACTYPE)
 
         con_cum = [0.0]
         for i in range(1, len(dp_dist)):
@@ -1451,7 +1437,7 @@ if __name__ == "__main__":
     filename = begin.replace(" ", "_").replace(":", "-")
     # Tag the cache by meteo source: cached_interpolant_from_dataframe does no
     # invalidation, so grid- and ERA5-derived interpolants must not share a key.
-    from src.data import GridWeather  # local: avoids import cycle
+    from src.data.meteo import GridWeather  # local: avoids import cycle
     domain_meteo = GridWeather(GRID_PATH, sigmas=[sigma])
     src_tag = "grid" if domain_meteo is not None else "era5"
     interpolant_cache = os.environ.get(

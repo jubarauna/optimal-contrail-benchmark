@@ -30,7 +30,8 @@ import pickle
 
 import numpy as np
 
-from src.data import FlightData, GridWeather
+from src.data.traffic import FlightData
+from src.data.meteo import GridWeather
 from src.paths import FIGURE_DIR
 from src.optimization.opentop.drive_opentop import (
     FLIGHTS_FILE, GRID_FILE, load_saved_opt, plot_flight,
@@ -269,7 +270,7 @@ def solver_fields(opt, ctx, graph_payloads, gw):
     import pandas as pd
     sys.path.insert(0, str(PROJECT_ROOT / "2_Run"))
     from batch_graph2d import build_environment
-    from src.interpolant import load_global_interpolant
+    from src.contrails.interpolant import load_global_interpolant
 
     g = load_global_interpolant(sigma=float(SIGMA), out_dir=Path(GRID_FILE).parent)
     ctx_g = next(iter(graph_payloads.values()))["context"] if graph_payloads else ctx
@@ -283,7 +284,7 @@ def solver_fields(opt, ctx, graph_payloads, gw):
     # from that interpolant instead of the bspline it did not see.
     shape = ctx.get("interpolant_shape", "bspline")
     if shape != "bspline":
-        from src.interpolant import shift_interpolant
+        from src.contrails.interpolant import shift_interpolant
         g_ot, g_ot_meta = load_global_interpolant(sigma=float(SIGMA),
                                                   out_dir=Path(GRID_FILE).parent, shape=shape)
         interp = shift_interpolant(g_ot, ctx["begin"], g_ot_meta)
@@ -365,7 +366,7 @@ def graph_route(payload, real):
     background), and the map falls back to the great circle in ``graph_records``.
     """
     from openap.aero import ft
-    from src.models.grid.contrail_grid import real_flight_route
+    from src.data.route import real_flight_route
 
     if real is None:
         return None
@@ -425,7 +426,7 @@ def graph_records(label, payload, real):
     """
     import pandas as pd
     from openap.aero import ft
-    from src.models.grid.contrail_grid import great_circle_route
+    from src.data.route import great_circle_route
 
     ctx_g = payload["context"]
     route = graph_route(payload, real)

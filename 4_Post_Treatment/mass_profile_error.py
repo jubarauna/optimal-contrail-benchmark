@@ -96,19 +96,18 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.paths import results_root  # noqa: E402
-from src.flights import ensure_flight_slice, load_flight_index  # noqa: E402
+from src.data.flights import ensure_flight_slice, load_flight_index  # noqa: E402
 from src.config import (  # noqa: E402
     DEFAULT_DATA_PATH,
     DEFAULT_GRID_PATH,
 )
 from src.config import ALT_STEP_FT, MAX_ROC_FPM  # noqa: E402
-from src.interpolant import (  # noqa: E402
+from src.contrails.interpolant import (  # noqa: E402
     load_global_interpolant, shift_interpolant)
-from src.data import FlightData, GridWeather  # noqa: E402
-from src.models.grid.contrail_grid import (  # noqa: E402
-    ContrailEnvironmentFromGrid,
-    real_flight_route,
-)
+from src.data.traffic import FlightData  # noqa: E402
+from src.data.meteo import GridWeather  # noqa: E402
+from src.optimization.environment import ContrailEnvironmentFromGrid  # noqa: E402
+from src.data.route import real_flight_route  # noqa: E402
 from src.optimization.graph_based.model_2D import DpOptimizer  # noqa: E402
 from src.postprocess.evaluation import evaluate_path  # noqa: E402
 from openap import aero  # noqa: E402
