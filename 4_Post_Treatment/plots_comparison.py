@@ -343,8 +343,7 @@ CAMPAIGNS = {
         "sources": [
             ("opentop_single", CRUISE2D / "OpenTOP" / "Singlestart_start0", "m_0*/*_sigma[0-9].pkl.gz"),
             ("opentop_ms", CRUISE2D / "OpenTOP", "m_0*/*_sigma[0-9]_ms.pkl.gz"),
-            # DP re-priced with the re-timed post-hoc (reprice_dp_retimed.py)
-            ("dp", CRUISE2D / "DP_retimed", "m_0*/*_dp.pkl.gz"),
+            ("dp", CRUISE2D / "DP", "m_0*/*_dp.pkl.gz"),
         ],
         "population": tuple(
             BENCH.parent / "convergence" / "2d_cruise"

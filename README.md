@@ -6,8 +6,20 @@ the fuel/contrail trade-off on real European flights of 2022-02-20:
 multi-objective label-setting solver that returns the whole Pareto front in one
 solve).
 
-No data or results are in this repository — 11.5 GB of flight parquets, meteo
-grids and solver pickles live in the Zenodo deposit (DOI: 10.5281/zenodo.24344602). Each stage's README says what to download and where to put it.
+No data or results are in this repository. The 2d_cruise campaign's inputs and
+results (about 2 GB) are in the Zenodo deposit,
+[10.5281/zenodo.24344602](https://doi.org/10.5281/zenodo.24344602), as four zips.
+Each keeps its repository path, so unzip all four into the repository root:
+
+| Zip | Size | Contents |
+|---|---|---|
+| `flight_data.zip` | 340 MB | `0_Data/flight_data/`: flight parquet and ERA5 contrail-cost grid |
+| `flight_selection_2d_cruise.zip` | 111 MB | `3_Results/flight_selection_2d_cruise/` (stage 1 fuel-only solves, flight lists) and `3_Results/convergence/2d_cruise/` |
+| `contrail_2d_cruise_DP.zip` | 45 MB | `3_Results/contrail_2d_cruise/DP/`: DP results |
+| `contrail_2d_cruise_OpenTOP.zip` | 1.5 GB | `3_Results/contrail_2d_cruise/OpenTOP/`: multistart and singlestart (start 0) results |
+
+The global interpolant (`global_interp_sigma2.casadi`) is not in the deposit: rebuild it
+with `python 0_Data/build_global_interpolant.py --sigma 2`.
 
 ## Pipeline
 

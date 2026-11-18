@@ -20,8 +20,8 @@ against the stored fuel / contrail, so a route rebuilt differently from the batc
 is caught rather than silently mixed in (that check is not timed).
 
     python 4_Post_Treatment/reprice_dp_retimed.py
-    python 4_Post_Treatment/reprice_dp_retimed.py --src 3_Results/contrail_2d_cruise/DP \
-        --dst 3_Results/contrail_2d_cruise/DP_retimed
+    python 4_Post_Treatment/reprice_dp_retimed.py --src 3_Results/contrail_2d_cruise/DP_gridtime \
+        --dst 3_Results/contrail_2d_cruise/DP
 """
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ from src.postprocess.evaluation import (  # noqa: E402
 )
 from src.performance.aircraft import fuel_burn  # noqa: E402
 
-SRC = PROJECT_ROOT / "3_Results" / "contrail_2d_cruise" / "DP"
+SRC = PROJECT_ROOT / "3_Results" / "contrail_2d_cruise" / "DP_gridtime"
 PHASE = {"fuel_only": "anchor", "weighted_sum": "ws", "epsilon_constraint": "eps"}
 CHECK_RTOL = 1e-6
 
